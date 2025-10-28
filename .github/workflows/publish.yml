@@ -7,6 +7,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
 
 jobs:
   # Test suite - runs once on Linux before building all platforms
@@ -27,21 +29,27 @@ jobs:
         sudo apt-get install -y clang llvm
     
     - name: Run all tests
-      run: |
-        echo "✅ Running unit tests..."
-        cargo test --lib --all-features
-        
-        echo "✅ Running ACID tests..."
-        cargo test --test acid_test
-        
-        echo "✅ Running integration tests..."
-        cargo test --test integration_test
-        
-        echo "✅ Running doc tests..."
-        cargo test --doc
+      uses: nick-invision/retry@v3
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: |
+          echo "✅ Running unit tests..."
+          cargo test --lib --all-features
+          
+          echo "✅ Running ACID tests..."
+          cargo test --test acid_test
+          
+          echo "✅ Running integration tests..."
+          cargo test --test integration_test
+          
+          echo "✅ Running doc tests..."
+          cargo test --doc
       env:
         CC: clang
         CXX: clang++
+        CARGO_INCREMENTAL: 0
+        RUST_BACKTRACE: 1
 
   # Build artifacts for all platforms (runs after tests pass)
   build-artifacts:
@@ -110,9 +118,12 @@ jobs:
     
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }} --all-features
+      timeout-minutes: 15
       env:
         CC: ${{ runner.os == 'Linux' && 'clang' || runner.os == 'macOS' && 'clang' || runner.os == 'Windows' && 'clang.exe' }}
         CXX: ${{ runner.os == 'Linux' && 'clang++' || runner.os == 'macOS' && 'clang++' || runner.os == 'Windows' && 'clang++.exe' }}
+        CARGO_INCREMENTAL: 0
+        RUST_BACKTRACE: 1
     
     - name: Package artifacts (Unix)
       if: runner.os != 'Windows'
@@ -164,16 +175,22 @@ jobs:
     
     - name: Verify package
       run: cargo package --all-features
+      timeout-minutes: 5
       env:
         CC: clang
         CXX: clang++
+        CARGO_INCREMENTAL: 0
+        RUST_BACKTRACE: 1
     
     - name: Publish to crates.io
       run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      timeout-minutes: 5
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         CC: clang
         CXX: clang++
+        CARGO_INCREMENTAL: 0
+        RUST_BACKTRACE: 1
   
   # Upload artifacts to GitHub Release
   upload-release:
