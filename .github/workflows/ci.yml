@@ -11,69 +11,9 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Install RocksDB dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y librocksdb-dev clang
-    
-    - name: Cache cargo registry
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
-    
-    - name: Cache cargo index
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-git-
-    
-    - name: Cache cargo build
-      uses: actions/cache@v3
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-target-
-    
-    - name: Build
-      run: cargo build --verbose --all-features
-    
-    - name: Build examples
-      run: |
-        cargo build --example quickstart
-        cargo build --example memory_agent
-        cargo build --example graph_relations
-        cargo build --example multimodal_agent
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts
-        path: |
-          target/debug/libopendb.*
-          target/debug/examples/*
-        retention-days: 1
-
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -102,36 +42,14 @@ jobs:
       run: |
         echo "RocksDB will be built from source"
     
-    - name: Cache cargo registry
-      uses: actions/cache@v3
+    - name: Cache dependencies
+      uses: Swatinem/rust-cache@v2
       with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
+        shared-key: ${{ matrix.os }}
+        cache-on-failure: true
     
-    - name: Cache cargo index
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-git-
-    
-    - name: Cache cargo build
-      uses: actions/cache@v3
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-target-
-    
-    - name: 📊 Run All Tests
-      run: |
-        cargo test --lib --all-features
-        cargo test --test acid_test
-        cargo test --test integration_test
-        cargo test --doc
+    - name: Run tests
+      run: cargo test --all-features
 
   security:
     name: Security Audit
