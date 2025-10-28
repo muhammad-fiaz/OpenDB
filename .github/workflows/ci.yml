@@ -9,7 +9,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-  ROCKSDB_STATIC: 0
 
 jobs:
   test:
@@ -31,11 +30,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y librocksdb-dev clang
+        sudo apt-get install -y clang libsnappy-dev
     
     - name: Install RocksDB dependencies (macOS)
       if: matrix.os == 'macos-latest'
-      run: brew install rocksdb
+      run: brew install snappy
     
     - name: Install RocksDB dependencies (Windows)
       if: matrix.os == 'windows-latest'
@@ -51,8 +50,6 @@ jobs:
       run: cargo test --test '*'
       env:
         CARGO_INCREMENTAL: 0
-        ROCKSDB_STATIC: 0
-        ROCKSDB_LIB_DIR: ${{ matrix.os == 'ubuntu-latest' && '/usr/lib/x86_64-linux-gnu' || matrix.os == 'macos-latest' && '/opt/homebrew/lib' || '' }}
 
   security:
     name: Security Audit
