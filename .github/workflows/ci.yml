@@ -26,15 +26,6 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
     
-    - name: Set up sccache (for C++ compilation caching)
-      uses: mozilla-actions/sccache-action@v0.0.6
-    
-    - name: Configure sccache
-      run: |
-        echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
-        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      shell: bash
-    
     - name: Install RocksDB dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
