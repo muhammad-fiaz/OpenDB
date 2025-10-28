@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/muhammad-fiaz/opendb/discussions
+    about: Ask questions, share ideas, or discuss OpenDB usage
+  - name: 📖 Documentation
+    url: https://muhammad-fiaz.github.io/opendb
+    about: Read the official OpenDB documentation
+  - name: 💡 Discord Community
+    url: https://discord.gg/opendb
+    about: Join our Discord server for real-time help and discussion

@@ -1,0 +1,164 @@
+name: 📚 Documentation Issue
+description: Report missing, incorrect, or unclear documentation
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve OpenDB's documentation! Clear docs make the project better for everyone.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues for similar documentation requests
+          required: true
+        - label: I am viewing the latest documentation at https://muhammad-fiaz.github.io/opendb
+          required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Documentation Issue Type
+      description: What kind of documentation issue is this?
+      options:
+        - Missing Documentation (feature not documented)
+        - Incorrect Information (docs are wrong)
+        - Unclear/Confusing (docs are hard to understand)
+        - Outdated (docs don't match current version)
+        - Broken Links/Examples (links or code don't work)
+        - Missing Examples (need more code samples)
+        - Typo/Grammar
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: section
+    attributes:
+      label: Documentation Section
+      description: Which part of the documentation is affected?
+      options:
+        - Introduction/Getting Started
+        - Installation
+        - Quick Start
+        - API Reference - Key-Value Store
+        - API Reference - Records Management
+        - API Reference - Graph Operations
+        - API Reference - Vector Search
+        - API Reference - Multimodal Files
+        - API Reference - Transactions
+        - Architecture - Overview
+        - Architecture - Storage Layer
+        - Architecture - Transaction Model
+        - Architecture - Caching Strategy
+        - Advanced Topics - Performance Tuning
+        - Advanced Topics - Extending OpenDB
+        - Contributing Guide
+        - README
+        - Code Examples
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: What's wrong with the documentation?
+      placeholder: |
+        Example: The vector search documentation doesn't explain how to change the embedding dimension from the default 384
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is this issue located?
+      placeholder: |
+        Example: 
+        - URL: https://muhammad-fiaz.github.io/opendb/api/vector.html
+        - Or file: docs/src/api/vector.md, line 42
+    validations:
+      required: false
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Documentation
+      description: What does the documentation currently say? (if applicable)
+      placeholder: |
+        Example: "OpenDB uses 384-dimensional vectors by default."
+        
+        But it doesn't explain how to change this.
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: |
+        Example: Add a code example showing:
+        
+        ```rust
+        let options = OpenDBOptions::with_dimension(768);
+        let db = OpenDB::open_with_options("./db", options)?;
+        ```
+        
+        And explain when you might want different dimensions (384 for MiniLM, 768 for BERT, 1536 for OpenAI).
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Proposed Code Example (if applicable)
+      description: If you're suggesting new example code, provide it here
+      render: rust
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who would benefit from this documentation improvement?
+      options:
+        - Beginners (new to OpenDB)
+        - Intermediate Users
+        - Advanced Users
+        - Contributors
+        - All Users
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Impact
+      description: How much does this documentation issue impact users?
+      options:
+        - Critical (prevents users from using a feature)
+        - High (causes significant confusion)
+        - Medium (minor confusion or inconvenience)
+        - Low (nice to have improvement)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help fix this documentation?
+      options:
+        - label: I am willing to submit a PR to fix this documentation
+        - label: I can provide more details or examples if needed
+        - label: I can review documentation changes
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might help (screenshots, related issues, etc.)

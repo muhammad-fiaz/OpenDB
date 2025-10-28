@@ -1,0 +1,52 @@
+[package]
+name = "opendb"
+version = "0.0.0"
+edition = "2024"
+authors = ["Muhammad Fiaz <contact@muhammadfiaz.com>"]
+description = "A high-performance hybrid embedded database in pure Rust with KV, records, graph, and vector support"
+repository = "https://github.com/muhammad-fiaz/OpenDB"
+documentation = "https://muhammad-fiaz.github.io/opendb"
+homepage = "https://muhammad-fiaz.github.io/opendb"
+license = "Apache-2.0"
+keywords = ["database", "embedded", "graph", "vector", "kv"]
+categories = ["database-implementations", "data-structures"]
+readme = "README.md"
+
+[dependencies]
+# Storage backend (high-performance LSM tree)
+rocksdb = "0.24"
+
+# Serialization (zero-copy, versioned)
+rkyv = { version = "0.7", features = ["validation"] }
+bincode = "2.0"
+
+# Caching
+lru = "0.16"
+
+# Vector search (HNSW)
+instant-distance = "0.6"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Utilities
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.18", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+colored = "2.1"
+
+# Concurrency
+parking_lot = "0.12"
+crossbeam = "0.8"
+
+[dev-dependencies]
+tempfile = "3.23"
+criterion = "0.7"
+rand = "0.8"
+
+[[bench]]
+name = "benchmark"
+harness = false
+

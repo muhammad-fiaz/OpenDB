@@ -1,0 +1,142 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in OpenDB
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us investigate.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I am using the latest version of OpenDB
+          required: false
+        - label: I have read the [documentation](https://muhammad-fiaz.github.io/opendb)
+          required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: "Example: OpenDB crashes when inserting a Memory with embeddings larger than 1000 dimensions"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "Example: The database should accept embeddings up to 2048 dimensions"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "Example: Got error: 'Vector dimension mismatch: expected 384, got 1024'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Create OpenDB with default options
+        2. Create Memory with 1024-dimensional embedding
+        3. Call db.insert_memory(&memory)
+        4. See error
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Sample
+      description: Minimal code that reproduces the issue
+      placeholder: |
+        ```rust
+        use opendb::{OpenDB, Memory};
+        
+        let db = OpenDB::open("./test_db")?;
+        let memory = Memory::new("id1", "content", vec![0.1; 1024], 0.8);
+        db.insert_memory(&memory)?; // Error here
+        ```
+      render: rust
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Information about your environment
+      value: |
+        - OpenDB version: 
+        - Rust version: 
+        - Operating System: 
+        - RocksDB version: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste any relevant error messages or logs
+      placeholder: "Paste error output here"
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (screenshots, stack traces, etc.)
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical (data loss, crashes)
+        - High (major functionality broken)
+        - Medium (functionality impaired)
+        - Low (minor issue, workaround exists)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Affected Module
+      description: Which part of OpenDB is affected?
+      options:
+        - Key-Value Store
+        - Records/Memory Management
+        - Graph Operations
+        - Vector Search
+        - Multimodal Files
+        - Transactions
+        - Cache
+        - Storage Backend
+        - Multiple Modules
+        - Unknown
+    validations:
+      required: false
