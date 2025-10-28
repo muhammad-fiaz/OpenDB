@@ -4,8 +4,8 @@
 
 ### High-Performance Hybrid Embedded Database for Rust
 
-[![Crates.io](https://img.shields.io/crates/v/opendb.svg)](https://crates.io/crates/opendb)
-[![Documentation](https://docs.rs/opendb/badge.svg)](https://muhammad-fiaz.github.io/opendb)
+[![Crates.io](https://img.shields.io/crates/v/OpenDB.svg)](https://crates.io/crates/OpenDB)
+[![Documentation](https://docs.rs/OpenDB/badge.svg)](https://muhammad-fiaz.github.io/OpenDB)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://github.com/muhammad-fiaz/opendb#license)
 [![Rust](https://img.shields.io/badge/rust-2021%2B-orange.svg)](https://www.rust-lang.org/)
 [![Deploy Docs](https://github.com/muhammad-fiaz/OpenDB/workflows/Deploy%20Documentation/badge.svg)](https://github.com/muhammad-fiaz/OpenDB/actions/workflows/docs-deploy.yml)
