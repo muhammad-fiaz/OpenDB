@@ -58,7 +58,9 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang llvm
+        sudo apt-get install -y clang-14 llvm-14
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-14 100
         if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
           sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
         fi
@@ -66,21 +68,22 @@ jobs:
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install llvm
+        brew install llvm@15
+        echo "/opt/homebrew/opt/llvm@15/bin" >> $GITHUB_PATH
     
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
       run: |
-        choco install llvm -y
-        # Ensure clang is in PATH
-        echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        # Windows uses MSVC by default, no need for clang
+        echo "Using MSVC toolchain for Windows"
     
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }} --all-features
-      timeout-minutes: 15
+      timeout-minutes: 20
       env:
-        CC: ${{ runner.os == 'Linux' && 'clang' || runner.os == 'macOS' && 'clang' || '' }}
-        CXX: ${{ runner.os == 'Linux' && 'clang++' || runner.os == 'macOS' && 'clang++' || '' }}
+        CC: ${{ runner.os == 'Linux' && 'clang-14' || runner.os == 'macOS' && 'clang' || '' }}
+        CXX: ${{ runner.os == 'Linux' && 'clang++-14' || runner.os == 'macOS' && 'clang++' || '' }}
+        CXXFLAGS: ${{ runner.os != 'Windows' && '-include cstdint' || '' }}
         CARGO_INCREMENTAL: 0
         RUST_BACKTRACE: 1
     
@@ -130,24 +133,28 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang llvm
+        sudo apt-get install -y clang-14 llvm-14
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-14 100
     
     - name: Verify package
       run: cargo package --all-features
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
-        CC: clang
-        CXX: clang++
+        CC: clang-14
+        CXX: clang++-14
+        CXXFLAGS: -include cstdint
         CARGO_INCREMENTAL: 0
         RUST_BACKTRACE: 1
     
     - name: Publish to crates.io
       run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        CC: clang
-        CXX: clang++
+        CC: clang-14
+        CXX: clang++-14
+        CXXFLAGS: -include cstdint
         CARGO_INCREMENTAL: 0
         RUST_BACKTRACE: 1
   
