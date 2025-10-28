@@ -44,15 +44,9 @@ crossbeam = "0.8"
 [dev-dependencies]
 tempfile = "3.23"
 rand = "0.8"
-# Only needed for benchmarks, optional to speed up test builds
-criterion = { version = "0.7", optional = true }
-
-[features]
-default = []
-benchmarks = ["criterion"]
+criterion = "0.7"
 
 [[bench]]
 name = "benchmark"
-required-features = ["benchmarks"]
 harness = false
 
