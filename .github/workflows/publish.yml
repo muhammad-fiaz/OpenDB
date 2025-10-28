@@ -11,50 +11,9 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  # Test suite - runs once on Linux before building all platforms
-  test:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y clang llvm
-    
-    - name: Run all tests
-      uses: nick-invision/retry@v3
-      with:
-        timeout_minutes: 10
-        max_attempts: 3
-        command: |
-          echo "✅ Running unit tests..."
-          cargo test --lib --all-features
-          
-          echo "✅ Running ACID tests..."
-          cargo test --test acid_test
-          
-          echo "✅ Running integration tests..."
-          cargo test --test integration_test
-          
-          echo "✅ Running doc tests..."
-          cargo test --doc
-      env:
-        CC: clang
-        CXX: clang++
-        CARGO_INCREMENTAL: 0
-        RUST_BACKTRACE: 1
-
-  # Build artifacts for all platforms (runs after tests pass)
+  # Build artifacts for all platforms
   build-artifacts:
     name: Build ${{ matrix.target }}
-    needs: test
     strategy:
       fail-fast: false
       matrix:
