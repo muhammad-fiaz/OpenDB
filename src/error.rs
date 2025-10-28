@@ -14,7 +14,9 @@ const GITHUB_ISSUES_URL: &str = "https://github.com/muhammad-fiaz/opendb/issues"
 #[derive(Error, Debug)]
 pub enum Error {
     /// Storage-layer errors (RocksDB)
-    #[error("Storage error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}")]
+    #[error(
+        "Storage error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}"
+    )]
     Storage(String),
 
     /// Serialization/deserialization errors
@@ -26,7 +28,9 @@ pub enum Error {
     NotFound(String),
 
     /// Transaction errors
-    #[error("Transaction error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}")]
+    #[error(
+        "Transaction error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}"
+    )]
     Transaction(String),
 
     /// Cache errors
@@ -34,7 +38,9 @@ pub enum Error {
     Cache(String),
 
     /// Vector index errors
-    #[error("Vector index error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}")]
+    #[error(
+        "Vector index error: {0}\n\nIf this error persists, please report it at: {GITHUB_ISSUES_URL}"
+    )]
     VectorIndex(String),
 
     /// Graph errors
@@ -50,11 +56,15 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     /// Generic errors
-    #[error("Internal error: {0}\n\nThis is likely a bug. Please report it at: {GITHUB_ISSUES_URL}")]
+    #[error(
+        "Internal error: {0}\n\nThis is likely a bug. Please report it at: {GITHUB_ISSUES_URL}"
+    )]
     Internal(String),
 
     /// Multimodal file processing errors
-    #[error("File processing error: {0}\n\nSupported formats: PDF, DOCX, TXT, MP3, MP4, WAV, etc.\nIf you need help, please visit: {GITHUB_ISSUES_URL}")]
+    #[error(
+        "File processing error: {0}\n\nSupported formats: PDF, DOCX, TXT, MP3, MP4, WAV, etc.\nIf you need help, please visit: {GITHUB_ISSUES_URL}"
+    )]
     FileProcessing(String),
 }
 
@@ -83,8 +93,7 @@ impl Error {
     pub fn user_message(&self) -> String {
         format!(
             "{}\n\n💡 Need help? Visit our GitHub issues: {}",
-            self,
-            GITHUB_ISSUES_URL
+            self, GITHUB_ISSUES_URL
         )
     }
 }

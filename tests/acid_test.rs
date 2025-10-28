@@ -1,9 +1,9 @@
 // ACID compliance tests
 
-use opendb::{OpenDB, OpenDBOptions, Memory, Result};
-use tempfile::TempDir;
-use std::thread;
+use opendb::{Memory, OpenDB, OpenDBOptions, Result};
 use std::sync::Arc;
+use std::thread;
+use tempfile::TempDir;
 
 fn setup_test_db() -> Result<(OpenDB, TempDir)> {
     let temp_dir = TempDir::new().unwrap();
@@ -76,7 +76,7 @@ fn test_consistency() -> Result<()> {
     // Both memory and relationship should exist
     assert!(db.get_memory("cons_1")?.is_some());
     assert!(db.get_memory("cons_2")?.is_some());
-    
+
     let related = db.get_related("cons_1", "related")?;
     assert_eq!(related, vec!["cons_2"]);
 

@@ -3,13 +3,16 @@
 // This example creates a database and shows what files are created,
 // explaining why OpenDB uses a folder structure instead of a single file.
 
-use opendb::{OpenDB, Memory, Result};
 use colored::*;
+use opendb::{Memory, OpenDB, Result};
 use std::fs;
 use std::path::Path;
 
 fn main() -> Result<()> {
-    println!("{}", "OpenDB Database Structure Example".bright_cyan().bold());
+    println!(
+        "{}",
+        "OpenDB Database Structure Example".bright_cyan().bold()
+    );
     println!("{}", "==================================".bright_cyan());
     println!();
 
@@ -24,8 +27,12 @@ fn main() -> Result<()> {
 
     // Create database
     let db = OpenDB::open(db_path)?;
-    
-    println!("{} Database created at: {}", "✓".green(), db_path.bright_white());
+
+    println!(
+        "{} Database created at: {}",
+        "✓".green(),
+        db_path.bright_white()
+    );
     println!();
 
     // Insert some data
@@ -48,9 +55,7 @@ fn main() -> Result<()> {
     println!();
 
     if let Ok(entries) = fs::read_dir(db_path) {
-        let mut files: Vec<_> = entries
-            .filter_map(|e| e.ok())
-            .collect();
+        let mut files: Vec<_> = entries.filter_map(|e| e.ok()).collect();
         files.sort_by_key(|e| e.file_name());
 
         for entry in files {
@@ -61,19 +66,54 @@ fn main() -> Result<()> {
 
             // Color-code different file types
             let (icon, description) = match file_name_str.as_ref() {
-                "OPENDB_INFO" => ("📄".to_string(), format!("OpenDB metadata file ({} bytes)", size).bright_green()),
-                "CURRENT" => ("🔗".to_string(), format!("Points to active MANIFEST ({} bytes)", size).yellow()),
-                "IDENTITY" => ("🆔".to_string(), format!("Database unique ID ({} bytes)", size).cyan()),
-                "LOCK" => ("🔒".to_string(), format!("Prevents concurrent access ({} bytes)", size).bright_red()),
-                s if s.starts_with("MANIFEST") => ("📋".to_string(), format!("Database file list ({} bytes)", size).bright_magenta()),
-                s if s.starts_with("OPTIONS") => ("⚙️".to_string(), format!("RocksDB settings ({} bytes)", size).blue()),
-                s if s.ends_with(".log") => ("📝".to_string(), format!("Write-Ahead Log ({} bytes)", size).bright_yellow()),
-                s if s.ends_with(".sst") => ("💾".to_string(), format!("Data storage file ({} bytes)", size).bright_white()),
-                s if s.starts_with("LOG") => ("📊".to_string(), format!("RocksDB log file ({} bytes)", size).white()),
-                _ => ("📁".to_string(), format!("Other file ({} bytes)", size).white()),
+                "OPENDB_INFO" => (
+                    "📄".to_string(),
+                    format!("OpenDB metadata file ({} bytes)", size).bright_green(),
+                ),
+                "CURRENT" => (
+                    "🔗".to_string(),
+                    format!("Points to active MANIFEST ({} bytes)", size).yellow(),
+                ),
+                "IDENTITY" => (
+                    "🆔".to_string(),
+                    format!("Database unique ID ({} bytes)", size).cyan(),
+                ),
+                "LOCK" => (
+                    "🔒".to_string(),
+                    format!("Prevents concurrent access ({} bytes)", size).bright_red(),
+                ),
+                s if s.starts_with("MANIFEST") => (
+                    "📋".to_string(),
+                    format!("Database file list ({} bytes)", size).bright_magenta(),
+                ),
+                s if s.starts_with("OPTIONS") => (
+                    "⚙️".to_string(),
+                    format!("RocksDB settings ({} bytes)", size).blue(),
+                ),
+                s if s.ends_with(".log") => (
+                    "📝".to_string(),
+                    format!("Write-Ahead Log ({} bytes)", size).bright_yellow(),
+                ),
+                s if s.ends_with(".sst") => (
+                    "💾".to_string(),
+                    format!("Data storage file ({} bytes)", size).bright_white(),
+                ),
+                s if s.starts_with("LOG") => (
+                    "📊".to_string(),
+                    format!("RocksDB log file ({} bytes)", size).white(),
+                ),
+                _ => (
+                    "📁".to_string(),
+                    format!("Other file ({} bytes)", size).white(),
+                ),
             };
 
-            println!("  {} {} - {}", icon, file_name_str.bright_white(), description);
+            println!(
+                "  {} {} - {}",
+                icon,
+                file_name_str.bright_white(),
+                description
+            );
         }
     }
 
@@ -81,7 +121,7 @@ fn main() -> Result<()> {
     println!("{}", "File Explanations:".bright_cyan().bold());
     println!("{}", "==================".bright_cyan());
     println!();
-    
+
     println!("{}", "📄 OPENDB_INFO".bright_green().bold());
     println!("   OpenDB-specific metadata file (created by OpenDB)");
     println!("   Explains database format and features");
@@ -108,30 +148,64 @@ fn main() -> Result<()> {
     println!("{}", "Why Folder-Based Architecture?".bright_cyan().bold());
     println!("{}", "==============================".bright_cyan());
     println!();
-    
-    println!("  {} {}", "✅".green(), "Higher write throughput (sequential WAL writes)");
-    println!("  {} {}", "✅".green(), "Better compression (data compressed in SST files)");
-    println!("  {} {}", "✅".green(), "Efficient compaction (background merging)");
-    println!("  {} {}", "✅".green(), "Crash recovery (WAL enables reliable recovery)");
-    println!("  {} {}", "✅".green(), "Horizontal scaling (easier to distribute files)");
+
+    println!(
+        "  {} {}",
+        "✅".green(),
+        "Higher write throughput (sequential WAL writes)"
+    );
+    println!(
+        "  {} {}",
+        "✅".green(),
+        "Better compression (data compressed in SST files)"
+    );
+    println!(
+        "  {} {}",
+        "✅".green(),
+        "Efficient compaction (background merging)"
+    );
+    println!(
+        "  {} {}",
+        "✅".green(),
+        "Crash recovery (WAL enables reliable recovery)"
+    );
+    println!(
+        "  {} {}",
+        "✅".green(),
+        "Horizontal scaling (easier to distribute files)"
+    );
     println!();
 
     println!("{}", "Important Notes:".bright_red().bold());
     println!("{}", "===============".bright_red());
     println!();
-    println!("  {} Always backup the {} (not individual files)", "⚠️".yellow(), "entire folder".bright_white().underline());
-    println!("  {} Do NOT manually edit files in the database folder", "⚠️".yellow());
-    println!("  {} Only one process can open a database at a time", "⚠️".yellow());
+    println!(
+        "  {} Always backup the {} (not individual files)",
+        "⚠️".yellow(),
+        "entire folder".bright_white().underline()
+    );
+    println!(
+        "  {} Do NOT manually edit files in the database folder",
+        "⚠️".yellow()
+    );
+    println!(
+        "  {} Only one process can open a database at a time",
+        "⚠️".yellow()
+    );
     println!();
 
     println!("{}", "To view database documentation:".bright_cyan());
     println!("  {} cat {}/OPENDB_INFO", "$".bright_white(), db_path);
     println!("  {} cat {}/README.md", "$".bright_white(), db_path);
-    println!("  {} cat {}/.opendb_config.json", "$".bright_white(), db_path);
+    println!(
+        "  {} cat {}/.opendb_config.json",
+        "$".bright_white(),
+        db_path
+    );
     println!();
 
     drop(db);
-    
+
     println!("{} Example complete!", "✨".bright_green());
     println!();
 

@@ -13,12 +13,15 @@
 // but the performance and maturity justify this choice.
 
 use crate::error::{Error, Result};
-use crate::storage::{StorageBackend, Transaction as TransactionTrait, Snapshot as SnapshotTrait, column_families::ColumnFamilies};
+use crate::storage::{
+    Snapshot as SnapshotTrait, StorageBackend, Transaction as TransactionTrait,
+    column_families::ColumnFamilies,
+};
+use chrono::Utc;
 use rocksdb::{Options, TransactionDB, TransactionDBOptions, TransactionOptions};
+use std::fs;
 use std::path::Path;
 use std::sync::Arc;
-use std::fs;
-use chrono::Utc;
 
 /// RocksDB storage backend
 pub struct RocksDBBackend {
@@ -39,7 +42,7 @@ impl RocksDBBackend {
         let mut opts = Options::default();
         opts.create_if_missing(true);
         opts.create_missing_column_families(true);
-        
+
         // Performance tuning
         opts.set_write_buffer_size(128 * 1024 * 1024); // 128MB
         opts.set_max_write_buffer_number(3);
@@ -56,9 +59,7 @@ impl RocksDBBackend {
             .map_err(|e| Error::Storage(format!("Failed to open database: {}", e)))?;
 
         // Create OpenDB metadata file to identify this as an OpenDB database
-        let backend = Self {
-            db: Arc::new(db),
-        };
+        let backend = Self { db: Arc::new(db) };
         backend.create_opendb_metadata(&path)?;
 
         Ok(backend)
@@ -72,12 +73,12 @@ impl RocksDBBackend {
     }
 
     /// Create OpenDB metadata file in the database directory
-    /// 
+    ///
     /// This file identifies the database as an OpenDB database and provides
     /// information about the database format and version.
     fn create_opendb_metadata<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let db_path = path.as_ref();
-        
+
         // Create OPENDB_INFO file
         let info_path = db_path.join("OPENDB_INFO");
         if !info_path.exists() {
@@ -264,8 +265,9 @@ impl RocksDBBackend {
                 Utc::now().to_rfc3339()
             );
 
-            fs::write(&config_path, config_content)
-                .map_err(|e| Error::Storage(format!("Failed to create .opendb_config.json: {}", e)))?;
+            fs::write(&config_path, config_content).map_err(|e| {
+                Error::Storage(format!("Failed to create .opendb_config.json: {}", e))
+            })?;
         }
 
         Ok(())
@@ -308,9 +310,9 @@ impl StorageBackend for RocksDBBackend {
     fn begin_transaction(&self) -> Result<Box<dyn TransactionTrait>> {
         let txn_opts = TransactionOptions::default();
         let write_opts = rocksdb::WriteOptions::default();
-        
+
         let txn = self.db.transaction_opt(&write_opts, &txn_opts);
-        
+
         Ok(Box::new(RocksDBTransaction {
             txn: Some(unsafe { std::mem::transmute(txn) }),
             db: Arc::clone(&self.db),
@@ -340,10 +342,11 @@ struct RocksDBTransaction {
 
 impl TransactionTrait for RocksDBTransaction {
     fn get(&self, cf: &str, key: &[u8]) -> Result<Option<Vec<u8>>> {
-        let cf_handle = self.db
+        let cf_handle = self
+            .db
             .cf_handle(cf)
             .ok_or_else(|| Error::Storage(format!("Column family not found: {}", cf)))?;
-        
+
         if let Some(txn) = &self.txn {
             Ok(txn.get_cf(cf_handle, key)?)
         } else {
@@ -352,10 +355,11 @@ impl TransactionTrait for RocksDBTransaction {
     }
 
     fn put(&mut self, cf: &str, key: &[u8], value: &[u8]) -> Result<()> {
-        let cf_handle = self.db
+        let cf_handle = self
+            .db
             .cf_handle(cf)
             .ok_or_else(|| Error::Storage(format!("Column family not found: {}", cf)))?;
-        
+
         if let Some(txn) = &mut self.txn {
             txn.put_cf(cf_handle, key, value)?;
             Ok(())
@@ -365,10 +369,11 @@ impl TransactionTrait for RocksDBTransaction {
     }
 
     fn delete(&mut self, cf: &str, key: &[u8]) -> Result<()> {
-        let cf_handle = self.db
+        let cf_handle = self
+            .db
             .cf_handle(cf)
             .ok_or_else(|| Error::Storage(format!("Column family not found: {}", cf)))?;
-        
+
         if let Some(txn) = &mut self.txn {
             txn.delete_cf(cf_handle, key)?;
             Ok(())
@@ -404,10 +409,11 @@ struct RocksDBSnapshot {
 
 impl SnapshotTrait for RocksDBSnapshot {
     fn get(&self, cf: &str, key: &[u8]) -> Result<Option<Vec<u8>>> {
-        let cf_handle = self.db
+        let cf_handle = self
+            .db
             .cf_handle(cf)
             .ok_or_else(|| Error::Storage(format!("Column family not found: {}", cf)))?;
-        
+
         Ok(self.db.get_cf(cf_handle, key)?)
     }
 }

@@ -4,8 +4,8 @@
 // using rkyv for zero-copy deserialization.
 
 use crate::error::{Error, Result};
-use crate::types::{Memory, Edge};
-use rkyv::{Deserialize, AlignedVec};
+use crate::types::{Edge, Memory};
+use rkyv::{AlignedVec, Deserialize};
 
 /// Schema version for backwards compatibility
 const SCHEMA_VERSION: u8 = 1;
@@ -14,7 +14,7 @@ const SCHEMA_VERSION: u8 = 1;
 pub fn encode_memory(memory: &Memory) -> Result<Vec<u8>> {
     let bytes = rkyv::to_bytes::<_, 256>(memory)
         .map_err(|e| Error::Codec(format!("Failed to serialize Memory: {}", e)))?;
-    
+
     // Prepend schema version
     let mut result = vec![SCHEMA_VERSION];
     result.extend_from_slice(&bytes);
@@ -30,21 +30,25 @@ pub fn decode_memory(bytes: &[u8]) -> Result<Memory> {
     // Check schema version
     let version = bytes[0];
     if version != SCHEMA_VERSION {
-        return Err(Error::Codec(format!("Unsupported schema version: {}", version)));
+        return Err(Error::Codec(format!(
+            "Unsupported schema version: {}",
+            version
+        )));
     }
 
     let data = &bytes[1..];
-    
+
     // Copy to aligned buffer for rkyv
     let mut aligned = AlignedVec::new();
     aligned.extend_from_slice(data);
-    
+
     let archived = rkyv::check_archived_root::<Memory>(&aligned)
         .map_err(|e| Error::Codec(format!("Failed to validate archived Memory: {}", e)))?;
-    
-    let memory: Memory = archived.deserialize(&mut rkyv::Infallible)
+
+    let memory: Memory = archived
+        .deserialize(&mut rkyv::Infallible)
         .map_err(|e| Error::Codec(format!("Failed to deserialize Memory: {}", e)))?;
-    
+
     Ok(memory)
 }
 
@@ -53,7 +57,7 @@ pub fn decode_memory(bytes: &[u8]) -> Result<Memory> {
 pub fn encode_edge(edge: &Edge) -> Result<Vec<u8>> {
     let bytes = rkyv::to_bytes::<_, 256>(edge)
         .map_err(|e| Error::Codec(format!("Failed to serialize Edge: {}", e)))?;
-    
+
     let mut result = vec![SCHEMA_VERSION];
     result.extend_from_slice(&bytes);
     Ok(result)
@@ -68,21 +72,25 @@ pub fn decode_edge(bytes: &[u8]) -> Result<Edge> {
 
     let version = bytes[0];
     if version != SCHEMA_VERSION {
-        return Err(Error::Codec(format!("Unsupported schema version: {}", version)));
+        return Err(Error::Codec(format!(
+            "Unsupported schema version: {}",
+            version
+        )));
     }
 
     let data = &bytes[1..];
-    
+
     // Copy to aligned buffer for rkyv
     let mut aligned = AlignedVec::new();
     aligned.extend_from_slice(data);
-    
+
     let archived = rkyv::check_archived_root::<Edge>(&aligned)
         .map_err(|e| Error::Codec(format!("Failed to validate archived Edge: {}", e)))?;
-    
-    let edge: Edge = archived.deserialize(&mut rkyv::Infallible)
+
+    let edge: Edge = archived
+        .deserialize(&mut rkyv::Infallible)
         .map_err(|e| Error::Codec(format!("Failed to deserialize Edge: {}", e)))?;
-    
+
     Ok(edge)
 }
 
@@ -91,7 +99,7 @@ pub fn encode_edges(edges: &[Edge]) -> Result<Vec<u8>> {
     let edges_vec: Vec<Edge> = edges.to_vec();
     let bytes = rkyv::to_bytes::<_, 256>(&edges_vec)
         .map_err(|e| Error::Codec(format!("Failed to serialize edges: {}", e)))?;
-    
+
     let mut result = vec![SCHEMA_VERSION];
     result.extend_from_slice(&bytes);
     Ok(result)
@@ -105,21 +113,25 @@ pub fn decode_edges(bytes: &[u8]) -> Result<Vec<Edge>> {
 
     let version = bytes[0];
     if version != SCHEMA_VERSION {
-        return Err(Error::Codec(format!("Unsupported schema version: {}", version)));
+        return Err(Error::Codec(format!(
+            "Unsupported schema version: {}",
+            version
+        )));
     }
 
     let data = &bytes[1..];
-    
+
     // Copy to aligned buffer for rkyv
     let mut aligned = AlignedVec::new();
     aligned.extend_from_slice(data);
-    
+
     let archived = rkyv::check_archived_root::<Vec<Edge>>(&aligned)
         .map_err(|e| Error::Codec(format!("Failed to validate archived edges: {}", e)))?;
-    
-    let edges: Vec<Edge> = archived.deserialize(&mut rkyv::Infallible)
+
+    let edges: Vec<Edge> = archived
+        .deserialize(&mut rkyv::Infallible)
         .map_err(|e| Error::Codec(format!("Failed to deserialize edges: {}", e)))?;
-    
+
     Ok(edges)
 }
 
@@ -130,10 +142,10 @@ mod tests {
     #[test]
     fn test_memory_encode_decode() {
         let memory = Memory::new("test_id", "test content", vec![1.0, 2.0, 3.0], 0.5);
-        
+
         let encoded = encode_memory(&memory).unwrap();
         let decoded = decode_memory(&encoded).unwrap();
-        
+
         assert_eq!(memory.id, decoded.id);
         assert_eq!(memory.content, decoded.content);
         assert_eq!(memory.embedding, decoded.embedding);
@@ -143,10 +155,10 @@ mod tests {
     #[test]
     fn test_edge_encode_decode() {
         let edge = Edge::new("from_1", "related", "to_1");
-        
+
         let encoded = encode_edge(&edge).unwrap();
         let decoded = decode_edge(&encoded).unwrap();
-        
+
         assert_eq!(edge.from, decoded.from);
         assert_eq!(edge.relation, decoded.relation);
         assert_eq!(edge.to, decoded.to);

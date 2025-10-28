@@ -2,7 +2,7 @@
 //
 // This demonstrates basic usage of OpenDB for agent memory storage.
 
-use opendb::{OpenDB, Memory, Result};
+use opendb::{Memory, OpenDB, Result};
 
 fn main() -> Result<()> {
     println!("=== OpenDB Quickstart ===\n");
@@ -65,7 +65,10 @@ fn main() -> Result<()> {
     let similar = db.search_similar(&query, 2)?;
     println!("\n✓ Vector search results:");
     for result in similar {
-        println!("  - {} (distance: {:.4})", result.memory.content, result.distance);
+        println!(
+            "  - {} (distance: {:.4})",
+            result.memory.content, result.distance
+        );
     }
 
     // List all memories

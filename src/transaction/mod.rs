@@ -25,9 +25,12 @@ impl Transaction {
     /// Get a value within this transaction
     pub fn get(&self, cf: &str, key: &[u8]) -> Result<Option<Vec<u8>>> {
         if !self.active {
-            return Err(crate::error::Error::Transaction("Transaction not active".to_string()));
+            return Err(crate::error::Error::Transaction(
+                "Transaction not active".to_string(),
+            ));
         }
-        self.inner.as_ref()
+        self.inner
+            .as_ref()
             .ok_or_else(|| crate::error::Error::Transaction("Transaction not active".to_string()))?
             .get(cf, key)
     }
@@ -35,9 +38,12 @@ impl Transaction {
     /// Put a key-value pair within this transaction
     pub fn put(&mut self, cf: &str, key: &[u8], value: &[u8]) -> Result<()> {
         if !self.active {
-            return Err(crate::error::Error::Transaction("Transaction not active".to_string()));
+            return Err(crate::error::Error::Transaction(
+                "Transaction not active".to_string(),
+            ));
         }
-        self.inner.as_mut()
+        self.inner
+            .as_mut()
             .ok_or_else(|| crate::error::Error::Transaction("Transaction not active".to_string()))?
             .put(cf, key, value)
     }
@@ -45,9 +51,12 @@ impl Transaction {
     /// Delete a key within this transaction
     pub fn delete(&mut self, cf: &str, key: &[u8]) -> Result<()> {
         if !self.active {
-            return Err(crate::error::Error::Transaction("Transaction not active".to_string()));
+            return Err(crate::error::Error::Transaction(
+                "Transaction not active".to_string(),
+            ));
         }
-        self.inner.as_mut()
+        self.inner
+            .as_mut()
             .ok_or_else(|| crate::error::Error::Transaction("Transaction not active".to_string()))?
             .delete(cf, key)
     }
@@ -55,10 +64,13 @@ impl Transaction {
     /// Commit the transaction
     pub fn commit(mut self) -> Result<()> {
         if !self.active {
-            return Err(crate::error::Error::Transaction("Transaction already completed".to_string()));
+            return Err(crate::error::Error::Transaction(
+                "Transaction already completed".to_string(),
+            ));
         }
         self.active = false;
-        self.inner.take()
+        self.inner
+            .take()
             .ok_or_else(|| crate::error::Error::Transaction("Transaction not active".to_string()))?
             .commit()
     }
@@ -66,10 +78,13 @@ impl Transaction {
     /// Rollback the transaction
     pub fn rollback(mut self) -> Result<()> {
         if !self.active {
-            return Err(crate::error::Error::Transaction("Transaction already completed".to_string()));
+            return Err(crate::error::Error::Transaction(
+                "Transaction already completed".to_string(),
+            ));
         }
         self.active = false;
-        self.inner.take()
+        self.inner
+            .take()
             .ok_or_else(|| crate::error::Error::Transaction("Transaction not active".to_string()))?
             .rollback()
     }

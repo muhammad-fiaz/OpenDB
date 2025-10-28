@@ -1,6 +1,6 @@
 // Integration tests for OpenDB
 
-use opendb::{OpenDB, OpenDBOptions, Memory, Result};
+use opendb::{Memory, OpenDB, OpenDBOptions, Result};
 use tempfile::TempDir;
 
 fn setup_test_db() -> Result<(OpenDB, TempDir)> {
@@ -17,19 +17,19 @@ fn test_basic_kv_operations() -> Result<()> {
 
     // Put
     db.put(b"key1", b"value1")?;
-    
+
     // Get
     let value = db.get(b"key1")?;
     assert_eq!(value, Some(b"value1".to_vec()));
-    
+
     // Exists
     assert!(db.exists(b"key1")?);
     assert!(!db.exists(b"nonexistent")?);
-    
+
     // Delete
     db.delete(b"key1")?;
     assert_eq!(db.get(b"key1")?, None);
-    
+
     Ok(())
 }
 
@@ -53,7 +53,7 @@ fn test_memory_crud() -> Result<()> {
     // Update
     let updated = Memory::new("test_id", "updated content", vec![4.0, 5.0, 6.0], 0.9);
     db.insert_memory(&updated)?;
-    
+
     let retrieved = db.get_memory("test_id")?.unwrap();
     assert_eq!(retrieved.content, "updated content");
     assert_eq!(retrieved.importance, 0.9);
@@ -73,7 +73,7 @@ fn test_graph_operations() -> Result<()> {
     let mem1 = Memory::new("mem1", "content1", vec![1.0; 3], 0.5);
     let mem2 = Memory::new("mem2", "content2", vec![2.0; 3], 0.5);
     let mem3 = Memory::new("mem3", "content3", vec![3.0; 3], 0.5);
-    
+
     db.insert_memory(&mem1)?;
     db.insert_memory(&mem2)?;
     db.insert_memory(&mem3)?;
@@ -114,7 +114,7 @@ fn test_vector_search() -> Result<()> {
     let mem1 = Memory::new("v1", "first", vec![1.0, 0.0, 0.0], 0.5);
     let mem2 = Memory::new("v2", "second", vec![0.9, 0.1, 0.0], 0.5);
     let mem3 = Memory::new("v3", "third", vec![0.0, 1.0, 0.0], 0.5);
-    
+
     db.insert_memory(&mem1)?;
     db.insert_memory(&mem2)?;
     db.insert_memory(&mem3)?;
@@ -122,11 +122,11 @@ fn test_vector_search() -> Result<()> {
     // Search for similar to [1, 0, 0]
     let results = db.search_similar(&[1.0, 0.0, 0.0], 2)?;
     assert_eq!(results.len(), 2);
-    
+
     // First result should be v1 (exact match)
     assert_eq!(results[0].id, "v1");
     assert!(results[0].distance < 0.01); // Very close to 0
-    
+
     // Second should be v2 (close)
     assert_eq!(results[1].id, "v2");
 
@@ -177,7 +177,7 @@ fn test_cache_coherency() -> Result<()> {
 
     // Delete
     db.delete_memory("cache_test")?;
-    
+
     // Should not be found
     assert!(db.get_memory("cache_test")?.is_none());
 
@@ -191,7 +191,7 @@ fn test_metadata() -> Result<()> {
     let mem = Memory::new("meta_test", "content", vec![1.0; 3], 0.5)
         .with_metadata("key1", "value1")
         .with_metadata("key2", "value2");
-    
+
     db.insert_memory(&mem)?;
 
     let retrieved = db.get_memory("meta_test")?.unwrap();

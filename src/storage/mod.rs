@@ -2,8 +2,8 @@
 //
 // This module defines the storage traits that allow pluggable backends.
 
-pub mod rocksdb_backend;
 pub mod column_families;
+pub mod rocksdb_backend;
 
 use crate::error::Result;
 use std::sync::Arc;

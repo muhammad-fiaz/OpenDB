@@ -5,8 +5,8 @@
 use crate::cache::Cache;
 use lru::LruCache;
 use parking_lot::RwLock;
-use std::num::NonZeroUsize;
 use std::hash::Hash;
+use std::num::NonZeroUsize;
 
 /// Thread-safe LRU cache
 pub struct LruMemoryCache<K, V> {
@@ -96,21 +96,30 @@ mod tests {
     #[test]
     fn test_lru_basic() {
         let cache = LruMemoryCache::new(2);
-        
+
         cache.insert("key1".to_string(), "value1".to_string());
         cache.insert("key2".to_string(), "value2".to_string());
-        
+
         // Verify key1 is present
-        assert_eq!(cache.get_cloned(&"key1".to_string()), Some("value1".to_string()));
-        
+        assert_eq!(
+            cache.get_cloned(&"key1".to_string()),
+            Some("value1".to_string())
+        );
+
         // Insert key3, which should evict key2 (since we just accessed key1, making it most recent)
         cache.insert("key3".to_string(), "value3".to_string());
-        
+
         // key1 should still be there (it was accessed, so it's recent)
-        assert_eq!(cache.get_cloned(&"key1".to_string()), Some("value1".to_string()));
+        assert_eq!(
+            cache.get_cloned(&"key1".to_string()),
+            Some("value1".to_string())
+        );
         // key2 should be evicted (it was least recently used)
         assert_eq!(cache.get_cloned(&"key2".to_string()), None);
         // key3 should be there
-        assert_eq!(cache.get_cloned(&"key3".to_string()), Some("value3".to_string()));
+        assert_eq!(
+            cache.get_cloned(&"key3".to_string()),
+            Some("value3".to_string())
+        );
     }
 }

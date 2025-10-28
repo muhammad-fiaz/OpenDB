@@ -5,10 +5,10 @@
 pub struct HnswParams {
     /// Maximum number of connections per layer (M)
     pub max_connections: usize,
-    
+
     /// Size of the dynamic candidate list (ef_construction)
     pub ef_construction: usize,
-    
+
     /// Search quality parameter (ef)
     pub ef_search: usize,
 }

@@ -2,7 +2,7 @@
 //
 // Demonstrates using OpenDB as a memory backend for an AI agent.
 
-use opendb::{OpenDB, Memory, OpenDBOptions, Result};
+use opendb::{Memory, OpenDB, OpenDBOptions, Result};
 
 fn main() -> Result<()> {
     println!("=== Memory Agent Demo ===\n");
@@ -26,7 +26,7 @@ fn main() -> Result<()> {
         let memory = Memory::new(id, content, embedding, importance)
             .with_metadata("type", "user_fact")
             .with_metadata("agent", "assistant_v1");
-        
+
         db.insert_memory(&memory)?;
     }
     println!("✓ Stored {} agent memories", 5);
@@ -39,31 +39,33 @@ fn main() -> Result<()> {
     // Query: Find memories related to work
     let work_query = generate_synthetic_embedding("work and career");
     let work_memories = db.search_similar(&work_query, 3)?;
-    
+
     println!("\n📋 Work-related memories:");
     for result in work_memories {
-        println!("  - {} (relevance: {:.2})", 
-                 result.memory.content, 
-                 1.0 / (1.0 + result.distance));
+        println!(
+            "  - {} (relevance: {:.2})",
+            result.memory.content,
+            1.0 / (1.0 + result.distance)
+        );
     }
 
     // Query: Find memories about hobbies
     let hobby_query = generate_synthetic_embedding("hobbies and interests");
     let hobby_memories = db.search_similar(&hobby_query, 3)?;
-    
+
     println!("\n🎯 Hobby-related memories:");
     for result in hobby_memories {
-        println!("  - {} (relevance: {:.2})", 
-                 result.memory.content, 
-                 1.0 / (1.0 + result.distance));
+        println!(
+            "  - {} (relevance: {:.2})",
+            result.memory.content,
+            1.0 / (1.0 + result.distance)
+        );
     }
 
     // Get important memories (importance > 0.8)
     let all = db.list_memories("mem")?;
-    let important: Vec<_> = all.into_iter()
-        .filter(|m| m.importance > 0.8)
-        .collect();
-    
+    let important: Vec<_> = all.into_iter().filter(|m| m.importance > 0.8).collect();
+
     println!("\n⭐ High-importance memories:");
     for mem in important {
         println!("  - {} (importance: {})", mem.content, mem.importance);
@@ -90,7 +92,7 @@ fn generate_synthetic_embedding(text: &str) -> Vec<f32> {
     for (i, c) in text.chars().enumerate() {
         embedding[i % 384] += (c as u32 as f32) / 1000.0;
     }
-    
+
     // Normalize
     let norm: f32 = embedding.iter().map(|x| x * x).sum::<f32>().sqrt();
     if norm > 0.0 {
@@ -98,6 +100,6 @@ fn generate_synthetic_embedding(text: &str) -> Vec<f32> {
             *x /= norm;
         }
     }
-    
+
     embedding
 }

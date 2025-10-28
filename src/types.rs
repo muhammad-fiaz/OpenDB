@@ -2,10 +2,10 @@
 //
 // This module defines the primary data structures used in OpenDB.
 
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use chrono::Utc;
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Memory record - the primary data structure for agent memory storage
 ///
@@ -55,7 +55,12 @@ impl Memory {
     ///     0.8,
     /// );
     /// ```
-    pub fn new(id: impl Into<String>, content: impl Into<String>, embedding: Vec<f32>, importance: f32) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        content: impl Into<String>,
+        embedding: Vec<f32>,
+        importance: f32,
+    ) -> Self {
         Self {
             id: id.into(),
             content: content.into(),
@@ -103,7 +108,11 @@ pub struct Edge {
 
 impl Edge {
     /// Create a new edge
-    pub fn new(from: impl Into<String>, relation: impl Into<String>, to: impl Into<String>) -> Self {
+    pub fn new(
+        from: impl Into<String>,
+        relation: impl Into<String>,
+        to: impl Into<String>,
+    ) -> Self {
         Self {
             from: from.into(),
             relation: relation.into(),
@@ -138,7 +147,18 @@ pub struct SearchResult {
 // ==============================================================================
 
 /// Supported file types for multimodal embeddings and AI processing
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Archive, RkyvSerialize, RkyvDeserialize)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    Archive,
+    RkyvSerialize,
+    RkyvDeserialize,
+)]
 #[archive(check_bytes)]
 pub enum FileType {
     /// Plain text file (.txt, .md, etc.)

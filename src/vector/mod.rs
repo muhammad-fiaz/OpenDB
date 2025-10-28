@@ -3,10 +3,10 @@
 pub mod hnsw_index;
 
 use crate::error::{Error, Result};
-use crate::types::Memory;
 use crate::storage::{SharedStorage, column_families::ColumnFamilies};
-use std::sync::Arc;
+use crate::types::Memory;
 use parking_lot::RwLock;
+use std::sync::Arc;
 
 /// Vector manager for semantic search
 pub struct VectorManager {
@@ -37,14 +37,16 @@ impl VectorManager {
 
         // Store the embedding
         let key = memory.id.as_bytes();
-        let embedding_bytes = bincode::encode_to_vec(&memory.embedding, bincode::config::standard())
-            .map_err(|e| Error::Codec(format!("Failed to serialize embedding: {}", e)))?;
-        
-        self.storage.put(ColumnFamilies::VECTOR_DATA, key, &embedding_bytes)?;
-        
+        let embedding_bytes =
+            bincode::encode_to_vec(&memory.embedding, bincode::config::standard())
+                .map_err(|e| Error::Codec(format!("Failed to serialize embedding: {}", e)))?;
+
+        self.storage
+            .put(ColumnFamilies::VECTOR_DATA, key, &embedding_bytes)?;
+
         // Invalidate cache
         *self.cache.write() = None;
-        
+
         Ok(())
     }
 
@@ -60,14 +62,16 @@ impl VectorManager {
 
         // Ensure cache is built
         self.ensure_cache_built()?;
-        
+
         let cache = self.cache.read();
-        let vectors = cache.as_ref().ok_or_else(|| Error::VectorIndex("Cache not built".to_string()))?;
-        
+        let vectors = cache
+            .as_ref()
+            .ok_or_else(|| Error::VectorIndex("Cache not built".to_string()))?;
+
         if vectors.is_empty() {
             return Ok(Vec::new());
         }
-        
+
         // Brute-force k-NN search
         let mut results: Vec<(String, f32)> = vectors
             .iter()
@@ -76,11 +80,11 @@ impl VectorManager {
                 (id.clone(), distance)
             })
             .collect();
-        
+
         // Sort by distance and take top k
         results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         results.truncate(k);
-        
+
         Ok(results)
     }
 
@@ -93,22 +97,23 @@ impl VectorManager {
 
         // Build cache
         let mut values = Vec::new();
-        
+
         // Scan all vectors
         let pairs = self.storage.scan_prefix(ColumnFamilies::VECTOR_DATA, &[])?;
-        
+
         for (key, value) in pairs {
             let id = String::from_utf8(key)
                 .map_err(|e| Error::VectorIndex(format!("Invalid key: {}", e)))?;
-            
-            let (embedding, _): (Vec<f32>, usize) = bincode::decode_from_slice(&value, bincode::config::standard())
-                .map_err(|e| Error::Codec(format!("Failed to deserialize embedding: {}", e)))?;
-            
+
+            let (embedding, _): (Vec<f32>, usize) =
+                bincode::decode_from_slice(&value, bincode::config::standard())
+                    .map_err(|e| Error::Codec(format!("Failed to deserialize embedding: {}", e)))?;
+
             values.push((id, embedding));
         }
-        
+
         *self.cache.write() = Some(values);
-        
+
         Ok(())
     }
 
@@ -116,10 +121,10 @@ impl VectorManager {
     pub fn delete(&self, id: &str) -> Result<()> {
         let key = id.as_bytes();
         self.storage.delete(ColumnFamilies::VECTOR_DATA, key)?;
-        
+
         // Invalidate cache
         *self.cache.write() = None;
-        
+
         Ok(())
     }
 
@@ -138,4 +143,3 @@ fn euclidean_distance(a: &[f32], b: &[f32]) -> f32 {
         .sum::<f32>()
         .sqrt()
 }
-

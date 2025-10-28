@@ -3,12 +3,20 @@
 // This example demonstrates how to use OpenDB for AI/LLM applications
 // with support for various file formats (PDF, DOCX, audio, video, text).
 
-use opendb::{OpenDB, OpenDBOptions, MultimodalDocument, DocumentChunk, FileType, Result};
 use colored::*;
+use opendb::{DocumentChunk, FileType, MultimodalDocument, OpenDB, OpenDBOptions, Result};
 
 fn main() -> Result<()> {
-    println!("{}", "OpenDB Multimodal AI Agent Memory Example".bright_cyan().bold());
-    println!("{}", "==========================================".bright_cyan());
+    println!(
+        "{}",
+        "OpenDB Multimodal AI Agent Memory Example"
+            .bright_cyan()
+            .bold()
+    );
+    println!(
+        "{}",
+        "==========================================".bright_cyan()
+    );
     println!();
 
     // Open database with 384-dimensional embeddings (common for AI models)
@@ -29,8 +37,17 @@ fn main() -> Result<()> {
     .with_metadata("pages", "15")
     .with_metadata("extraction_method", "pdfium");
 
-    println!("  {} PDF: {} ({} bytes)", "✓".green(), pdf_doc.filename.bright_white(), pdf_doc.file_size);
-    println!("  {} Extracted text: {} chars", "✓".green(), pdf_doc.extracted_text.len());
+    println!(
+        "  {} PDF: {} ({} bytes)",
+        "✓".green(),
+        pdf_doc.filename.bright_white(),
+        pdf_doc.file_size
+    );
+    println!(
+        "  {} Extracted text: {} chars",
+        "✓".green(),
+        pdf_doc.extracted_text.len()
+    );
 
     // Example 2: Process a Word document
     println!();
@@ -46,7 +63,12 @@ fn main() -> Result<()> {
     .with_metadata("created_by", "Alice")
     .with_metadata("meeting_date", "2024-01-15");
 
-    println!("  {} DOCX: {} ({} bytes)", "✓".green(), docx_doc.filename.bright_white(), docx_doc.file_size);
+    println!(
+        "  {} DOCX: {} ({} bytes)",
+        "✓".green(),
+        docx_doc.filename.bright_white(),
+        docx_doc.file_size
+    );
 
     // Example 3: Process audio file with transcription
     println!();
@@ -63,24 +85,39 @@ fn main() -> Result<()> {
     .with_metadata("transcription_model", "whisper-large-v3");
 
     // Add timestamped chunks for audio
-    audio_doc.add_chunk(DocumentChunk::new(
-        "chunk_0",
-        "Introduction segment discussing AI trends.",
-        generate_embedding("AI trends introduction"),
-        0,
-        150,
-    ).with_metadata("timestamp", "00:00-02:30"));
+    audio_doc.add_chunk(
+        DocumentChunk::new(
+            "chunk_0",
+            "Introduction segment discussing AI trends.",
+            generate_embedding("AI trends introduction"),
+            0,
+            150,
+        )
+        .with_metadata("timestamp", "00:00-02:30"),
+    );
 
-    audio_doc.add_chunk(DocumentChunk::new(
-        "chunk_1",
-        "Deep dive into machine learning applications.",
-        generate_embedding("Machine learning applications"),
-        150,
-        450,
-    ).with_metadata("timestamp", "02:30-07:30"));
+    audio_doc.add_chunk(
+        DocumentChunk::new(
+            "chunk_1",
+            "Deep dive into machine learning applications.",
+            generate_embedding("Machine learning applications"),
+            150,
+            450,
+        )
+        .with_metadata("timestamp", "02:30-07:30"),
+    );
 
-    println!("  {} Audio: {} ({} MB)", "✓".green(), audio_doc.filename.bright_white(), audio_doc.file_size / (1024 * 1024));
-    println!("  {} Transcription chunks: {}", "✓".green(), audio_doc.chunks.len());
+    println!(
+        "  {} Audio: {} ({} MB)",
+        "✓".green(),
+        audio_doc.filename.bright_white(),
+        audio_doc.file_size / (1024 * 1024)
+    );
+    println!(
+        "  {} Transcription chunks: {}",
+        "✓".green(),
+        audio_doc.chunks.len()
+    );
 
     // Example 4: Process video file
     println!();
@@ -98,16 +135,24 @@ fn main() -> Result<()> {
     .with_metadata("frame_rate", "30");
 
     // Add video chunks with frame timestamps
-    video_doc.add_chunk(DocumentChunk::new(
-        "chunk_0",
-        "Introduction to Rust ownership and borrowing.",
-        generate_embedding("Rust ownership introduction"),
-        0,
-        200,
-    ).with_metadata("timestamp", "00:00-03:20")
-     .with_metadata("frame", "0"));
+    video_doc.add_chunk(
+        DocumentChunk::new(
+            "chunk_0",
+            "Introduction to Rust ownership and borrowing.",
+            generate_embedding("Rust ownership introduction"),
+            0,
+            200,
+        )
+        .with_metadata("timestamp", "00:00-03:20")
+        .with_metadata("frame", "0"),
+    );
 
-    println!("  {} Video: {} ({} MB)", "✓".green(), video_doc.filename.bright_white(), video_doc.file_size / (1024 * 1024));
+    println!(
+        "  {} Video: {} ({} MB)",
+        "✓".green(),
+        video_doc.filename.bright_white(),
+        video_doc.file_size / (1024 * 1024)
+    );
 
     // Example 5: Plain text file
     println!();
@@ -122,7 +167,12 @@ fn main() -> Result<()> {
     )
     .with_metadata("encoding", "UTF-8");
 
-    println!("  {} Text: {} ({} KB)", "✓".green(), text_doc.filename.bright_white(), text_doc.file_size / 1024);
+    println!(
+        "  {} Text: {} ({} KB)",
+        "✓".green(),
+        text_doc.filename.bright_white(),
+        text_doc.file_size / 1024
+    );
 
     // Demonstrate file type detection
     println!();
@@ -130,14 +180,27 @@ fn main() -> Result<()> {
     let extensions = vec!["pdf", "docx", "mp3", "mp4", "txt", "wav", "avi", "unknown"];
     for ext in extensions {
         let file_type = FileType::from_extension(ext);
-        println!("  {} .{}: {} - {}", "•".bright_blue(), ext.yellow(), format!("{:?}", file_type).cyan(), file_type.description());
+        println!(
+            "  {} .{}: {} - {}",
+            "•".bright_blue(),
+            ext.yellow(),
+            format!("{:?}", file_type).cyan(),
+            file_type.description()
+        );
     }
 
     // Demonstrate semantic search across multimodal documents
     println!();
     println!("{}", "🔎 Semantic search example:".bright_magenta());
-    println!("  {}: '{}'", "Query".bright_white(), "machine learning research".green());
-    println!("  This would search across {} document types:", "ALL".bright_red());
+    println!(
+        "  {}: '{}'",
+        "Query".bright_white(),
+        "machine learning research".green()
+    );
+    println!(
+        "  This would search across {} document types:",
+        "ALL".bright_red()
+    );
     println!("    {} PDF research papers", "•".bright_blue());
     println!("    {} Audio transcriptions", "•".bright_blue());
     println!("    {} Video captions", "•".bright_blue());
@@ -146,40 +209,84 @@ fn main() -> Result<()> {
 
     // Production workflow summary
     println!();
-    println!("{}", "📚 Production Workflow for AI/LLM Applications:".bright_cyan().bold());
-    println!("  {} Ingest files (PDF, DOCX, audio, video, text)", "1.".bright_white());
+    println!(
+        "{}",
+        "📚 Production Workflow for AI/LLM Applications:"
+            .bright_cyan()
+            .bold()
+    );
+    println!(
+        "  {} Ingest files (PDF, DOCX, audio, video, text)",
+        "1.".bright_white()
+    );
     println!("  {} Extract content:", "2.".bright_white());
-    println!("     {} PDF: Use pdf-extract, pdfium, or poppler", "•".yellow());
+    println!(
+        "     {} PDF: Use pdf-extract, pdfium, or poppler",
+        "•".yellow()
+    );
     println!("     {} DOCX: Use docx-rs or mammoth", "•".yellow());
-    println!("     {} Audio: Transcribe with whisper-rs or OpenAI Whisper API", "•".yellow());
-    println!("     {} Video: Extract captions/audio, use ffmpeg + whisper", "•".yellow());
+    println!(
+        "     {} Audio: Transcribe with whisper-rs or OpenAI Whisper API",
+        "•".yellow()
+    );
+    println!(
+        "     {} Video: Extract captions/audio, use ffmpeg + whisper",
+        "•".yellow()
+    );
     println!("     {} Text: Direct reading", "•".yellow());
     println!("  {} Generate embeddings:", "3.".bright_white());
-    println!("     {} Use sentence-transformers (e.g., all-MiniLM-L6-v2)", "•".yellow());
+    println!(
+        "     {} Use sentence-transformers (e.g., all-MiniLM-L6-v2)",
+        "•".yellow()
+    );
     println!("     {} Or OpenAI embeddings API", "•".yellow());
     println!("     {} Or local models via onnx-runtime", "•".yellow());
     println!("  {} Chunk large documents:", "4.".bright_white());
-    println!("     {} Split by paragraphs, sentences, or fixed token count", "•".yellow());
+    println!(
+        "     {} Split by paragraphs, sentences, or fixed token count",
+        "•".yellow()
+    );
     println!("     {} Each chunk gets its own embedding", "•".yellow());
     println!("  {} Store in OpenDB:", "5.".bright_white());
     println!("     {} Use Memory for simple text", "•".yellow());
     println!("     {} Use MultimodalDocument for files", "•".yellow());
-    println!("     {} Use DocumentChunk for large file segments", "•".yellow());
+    println!(
+        "     {} Use DocumentChunk for large file segments",
+        "•".yellow()
+    );
     println!("  {} Query with semantic search:", "6.".bright_white());
     println!("     {} Convert user query to embedding", "•".yellow());
     println!("     {} Find similar chunks/documents", "•".yellow());
-    println!("     {} Feed relevant context to LLM (RAG pattern)", "•".yellow());
+    println!(
+        "     {} Feed relevant context to LLM (RAG pattern)",
+        "•".yellow()
+    );
 
     println!();
-    println!("{}", "✨ OpenDB is production-ready for:".bright_green().bold());
+    println!(
+        "{}",
+        "✨ OpenDB is production-ready for:".bright_green().bold()
+    );
     println!("  {} AI agent memory systems", "•".cyan());
-    println!("  {} Multimodal RAG (Retrieval Augmented Generation)", "•".cyan());
-    println!("  {} Knowledge base construction from diverse sources", "•".cyan());
+    println!(
+        "  {} Multimodal RAG (Retrieval Augmented Generation)",
+        "•".cyan()
+    );
+    println!(
+        "  {} Knowledge base construction from diverse sources",
+        "•".cyan()
+    );
     println!("  {} Document Q&A systems", "•".cyan());
     println!("  {} Conversational AI with long-term memory", "•".cyan());
 
     println!();
-    println!("{} For help or issues, visit: {}", "💡".bright_yellow(), "https://github.com/muhammad-fiaz/opendb/issues".bright_blue().underline());
+    println!(
+        "{} For help or issues, visit: {}",
+        "💡".bright_yellow(),
+        "https://github.com/muhammad-fiaz/opendb/issues"
+            .bright_blue()
+            .underline()
+    );
 
     Ok(())
 }

@@ -1,6 +1,6 @@
 // Graph relations example
 
-use opendb::{OpenDB, Memory, Result};
+use opendb::{Memory, OpenDB, Result};
 
 fn main() -> Result<()> {
     println!("=== Graph Relations Demo ===\n");
@@ -9,11 +9,31 @@ fn main() -> Result<()> {
 
     // Create a knowledge graph of concepts
     let concepts = vec![
-        ("rust", "Rust is a systems programming language", vec![0.1; 4]),
-        ("memory_safety", "Memory safety without garbage collection", vec![0.2; 4]),
-        ("ownership", "Ownership system prevents data races", vec![0.3; 4]),
-        ("borrowing", "Borrowing allows references to data", vec![0.4; 4]),
-        ("lifetimes", "Lifetimes ensure references are valid", vec![0.5; 4]),
+        (
+            "rust",
+            "Rust is a systems programming language",
+            vec![0.1; 4],
+        ),
+        (
+            "memory_safety",
+            "Memory safety without garbage collection",
+            vec![0.2; 4],
+        ),
+        (
+            "ownership",
+            "Ownership system prevents data races",
+            vec![0.3; 4],
+        ),
+        (
+            "borrowing",
+            "Borrowing allows references to data",
+            vec![0.4; 4],
+        ),
+        (
+            "lifetimes",
+            "Lifetimes ensure references are valid",
+            vec![0.5; 4],
+        ),
     ];
 
     // Insert concepts

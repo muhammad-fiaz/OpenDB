@@ -1,8 +1,8 @@
 // Key-Value store API
 
+use crate::cache::lru_cache::LruMemoryCache;
 use crate::error::Result;
 use crate::storage::{SharedStorage, column_families::ColumnFamilies};
-use crate::cache::lru_cache::LruMemoryCache;
 use std::sync::Arc;
 
 /// Key-Value store
@@ -40,10 +40,10 @@ impl KvStore {
     pub fn put(&self, key: &[u8], value: &[u8]) -> Result<()> {
         // Write-through: update storage first
         self.storage.put(ColumnFamilies::DEFAULT, key, value)?;
-        
+
         // Then update cache
         self.cache.insert(key.to_vec(), value.to_vec());
-        
+
         Ok(())
     }
 
@@ -51,10 +51,10 @@ impl KvStore {
     pub fn delete(&self, key: &[u8]) -> Result<()> {
         // Delete from storage
         self.storage.delete(ColumnFamilies::DEFAULT, key)?;
-        
+
         // Invalidate cache
         self.cache.invalidate(&key.to_vec());
-        
+
         Ok(())
     }
 

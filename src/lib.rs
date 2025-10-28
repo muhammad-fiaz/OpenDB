@@ -49,24 +49,23 @@
 // - Contact: <contact@muhammadfiaz.com>
 
 // Re-export main types
+pub use database::{OpenDB, OpenDBOptions};
 pub use error::{Error, Result};
 pub use types::{
-    Memory, MemoryMetadata, 
-    FileType, MultimodalDocument, DocumentChunk, ProcessingStatus
+    DocumentChunk, FileType, Memory, MemoryMetadata, MultimodalDocument, ProcessingStatus,
 };
-pub use database::{OpenDB, OpenDBOptions};
 
 // Core modules
+pub mod database;
 pub mod error;
 pub mod types;
-pub mod database;
 
 // Internal modules
-pub(crate) mod storage;
-pub(crate) mod transaction;
 pub(crate) mod cache;
+pub(crate) mod codec;
+pub(crate) mod graph;
 pub(crate) mod kv;
 pub(crate) mod records;
-pub(crate) mod graph;
+pub(crate) mod storage;
+pub(crate) mod transaction;
 pub(crate) mod vector;
-pub(crate) mod codec;

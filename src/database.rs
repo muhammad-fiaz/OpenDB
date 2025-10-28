@@ -1,12 +1,12 @@
 // Main database module
 
 use crate::error::Result;
-use crate::types::{Memory, SearchResult};
-use crate::storage::{SharedStorage, rocksdb_backend::RocksDBBackend};
-use crate::transaction::{Transaction, manager::TransactionManager};
+use crate::graph::GraphManager;
 use crate::kv::KvStore;
 use crate::records::RecordsManager;
-use crate::graph::GraphManager;
+use crate::storage::{SharedStorage, rocksdb_backend::RocksDBBackend};
+use crate::transaction::{Transaction, manager::TransactionManager};
+use crate::types::{Memory, SearchResult};
 use crate::vector::VectorManager;
 use std::path::Path;
 use std::sync::Arc;
@@ -107,10 +107,10 @@ impl OpenDB {
     pub fn insert_memory(&self, memory: &Memory) -> Result<()> {
         // Store the record
         self.records.put(memory)?;
-        
+
         // Index the vector
         self.vector.insert(memory)?;
-        
+
         Ok(())
     }
 
@@ -183,7 +183,7 @@ impl OpenDB {
     /// List of search results with distances
     pub fn search_similar(&self, query: &[f32], k: usize) -> Result<Vec<SearchResult>> {
         let results = self.vector.search(query, k)?;
-        
+
         let mut search_results = Vec::new();
         for (id, distance) in results {
             if let Some(memory) = self.get_memory(&id)? {
@@ -194,7 +194,7 @@ impl OpenDB {
                 });
             }
         }
-        
+
         Ok(search_results)
     }
 
@@ -221,13 +221,13 @@ impl OpenDB {
 pub struct OpenDBOptions {
     /// KV cache size (number of entries)
     pub kv_cache_size: usize,
-    
+
     /// Record cache size (number of entries)
     pub record_cache_size: usize,
-    
+
     /// Vector dimension
     pub vector_dimension: usize,
-    
+
     /// Database storage path (optional - will use path from open() if not set)
     pub storage_path: Option<String>,
 }
@@ -248,7 +248,7 @@ impl OpenDBOptions {
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     /// Create options with a specific vector dimension
     pub fn with_dimension(dimension: usize) -> Self {
         Self {
@@ -256,25 +256,25 @@ impl OpenDBOptions {
             ..Default::default()
         }
     }
-    
+
     /// Set vector dimension (chainable)
     pub fn dimension(mut self, dimension: usize) -> Self {
         self.vector_dimension = dimension;
         self
     }
-    
+
     /// Set custom storage path (chainable)
     pub fn with_storage_path<S: Into<String>>(mut self, path: S) -> Self {
         self.storage_path = Some(path.into());
         self
     }
-    
+
     /// Set KV cache size (chainable)
     pub fn with_kv_cache_size(mut self, size: usize) -> Self {
         self.kv_cache_size = size;
         self
     }
-    
+
     /// Set record cache size (chainable)
     pub fn with_record_cache_size(mut self, size: usize) -> Self {
         self.record_cache_size = size;
