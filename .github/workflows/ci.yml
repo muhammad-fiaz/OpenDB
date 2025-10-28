@@ -11,40 +11,21 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  test:
-    name: Test Suite
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable, nightly]
+  build:
+    name: Build
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
     
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: ${{ matrix.rust }}
+      uses: dtolnay/rust-toolchain@stable
     
-    - name: Install RocksDB dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install RocksDB dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y librocksdb-dev clang
-    
-    - name: Install RocksDB dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install rocksdb llvm
-    
-    - name: Install RocksDB dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        # RocksDB will be built from source via rust-rocksdb
-        echo "RocksDB will be built from source"
     
     - name: Cache cargo registry
       uses: actions/cache@v3
@@ -73,24 +54,6 @@ jobs:
     - name: Build
       run: cargo build --verbose --all-features
     
-    - name: 📊 Run All Tests with Detailed Output
-      run: |
-        echo "::group::🧪 Running Unit Tests"
-        cargo test --lib --verbose --all-features -- --nocapture --test-threads=1
-        echo "::endgroup::"
-        
-        echo "::group::🔄 Running ACID Transaction Tests"
-        cargo test --test acid_test --verbose -- --nocapture --test-threads=1
-        echo "::endgroup::"
-        
-        echo "::group::🔗 Running Integration Tests"
-        cargo test --test integration_test --verbose -- --nocapture --test-threads=1
-        echo "::endgroup::"
-        
-        echo "::group::📚 Running Documentation Tests"
-        cargo test --doc --verbose -- --nocapture --test-threads=1
-        echo "::endgroup::"
-    
     - name: Build examples
       run: |
         cargo build --example quickstart
@@ -98,12 +61,23 @@ jobs:
         cargo build --example graph_relations
         cargo build --example multimodal_agent
     
-    - name: Run doctests
-      run: cargo test --doc
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          target/debug/libopendb.*
+          target/debug/examples/*
+        retention-days: 1
 
-  coverage:
-    name: Code Coverage
-    runs-on: ubuntu-latest
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     
     steps:
     - name: Checkout repository
@@ -112,22 +86,52 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
     
-    - name: Install RocksDB dependencies
+    - name: Install RocksDB dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y librocksdb-dev clang
     
-    - name: Install tarpaulin
-      run: cargo install cargo-tarpaulin
+    - name: Install RocksDB dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install rocksdb llvm
     
-    - name: Generate coverage
-      run: cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out xml
+    - name: Install RocksDB dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        echo "RocksDB will be built from source"
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+    - name: Cache cargo registry
+      uses: actions/cache@v3
       with:
-        files: ./cobertura.xml
-        fail_ci_if_error: false
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+    
+    - name: Cache cargo index
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-git-
+    
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-build-target-
+    
+    - name: 📊 Run All Tests
+      run: |
+        cargo test --lib --all-features
+        cargo test --test acid_test
+        cargo test --test integration_test
+        cargo test --doc
 
   security:
     name: Security Audit
@@ -144,31 +148,3 @@ jobs:
       uses: rustsec/audit-check@v1
       with:
         token: ${{ secrets.GH_TOKEN }}
-
-  benchmark:
-    name: Benchmarks
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Install RocksDB dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y librocksdb-dev clang
-    
-    - name: Run benchmarks
-      run: cargo bench --all-features -- --output-format bencher | tee output.txt
-    
-    - name: Store benchmark result
-      uses: benchmark-action/github-action-benchmark@v1
-      with:
-        tool: 'cargo'
-        output-file-path: output.txt
-        github-token: ${{ secrets.GH_TOKEN }}
-        auto-push: true
