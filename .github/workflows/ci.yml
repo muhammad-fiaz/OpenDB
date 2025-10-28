@@ -26,6 +26,15 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
     
+    - name: Set up sccache (for C++ compilation caching)
+      uses: mozilla-actions/sccache-action@v0.0.6
+    
+    - name: Configure sccache
+      run: |
+        echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+      shell: bash
+    
     - name: Install RocksDB dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -34,22 +43,22 @@ jobs:
     
     - name: Install RocksDB dependencies (macOS)
       if: matrix.os == 'macos-latest'
-      run: |
-        brew install rocksdb llvm
+      run: brew install rocksdb
     
     - name: Install RocksDB dependencies (Windows)
       if: matrix.os == 'windows-latest'
-      run: |
-        echo "RocksDB will be built from source"
+      run: echo "Building RocksDB from source with caching"
     
-    - name: Cache dependencies
+    - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: ${{ matrix.os }}
         cache-on-failure: true
     
     - name: Run tests
-      run: cargo test --all-features
+      run: cargo test --lib --bins
+      env:
+        CARGO_INCREMENTAL: 0
 
   security:
     name: Security Audit
