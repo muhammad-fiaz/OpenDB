@@ -8,21 +8,15 @@
 [![Documentation](https://docs.rs/opendb/badge.svg)](https://muhammad-fiaz.github.io/opendb)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://github.com/muhammad-fiaz/opendb#license)
 [![Rust](https://img.shields.io/badge/rust-2021%2B-orange.svg)](https://www.rust-lang.org/)
-
-[![CI](https://github.com/muhammad-fiaz/OpenDB/workflows/CI/badge.svg)](https://github.com/muhammad-fiaz/OpenDB/actions/workflows/ci.yml)
 [![Deploy Docs](https://github.com/muhammad-fiaz/OpenDB/workflows/Deploy%20Documentation/badge.svg)](https://github.com/muhammad-fiaz/OpenDB/actions/workflows/docs-deploy.yml)
 [![Publish](https://github.com/muhammad-fiaz/OpenDB/workflows/Publish%20to%20crates.io/badge.svg)](https://github.com/muhammad-fiaz/OpenDB/actions/workflows/publish.yml)
-
 [![Downloads](https://img.shields.io/crates/d/opendb.svg)](https://crates.io/crates/opendb)
 [![GitHub Stars](https://img.shields.io/github/stars/muhammad-fiaz/opendb?style=social)](https://github.com/muhammad-fiaz/opendb/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/muhammad-fiaz/opendb?style=social)](https://github.com/muhammad-fiaz/opendb/network/members)
-
 [![Issues](https://img.shields.io/github/issues/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/OpenDB/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/OpenDB/pulls)
 [![Last Commit](https://img.shields.io/github/last-commit/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/opendb/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/opendb/graphs/contributors)
-
-[![Lines of Code](https://img.shields.io/tokei/lines/github/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/opendb)
 [![Code Size](https://img.shields.io/github/languages/code-size/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/opendb)
 [![Repo Size](https://img.shields.io/github/repo-size/muhammad-fiaz/opendb)](https://github.com/muhammad-fiaz/opendb)
 
